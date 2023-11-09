@@ -16,7 +16,7 @@ void Game::start() {
 
 
     //Mouse positions
-    sf::Vector2f oldPos, newPos;
+    sf::Vector2i oldPos, newPos;
     //Did the camera moved
     bool moved = false;
     //Can the camera move
@@ -40,10 +40,10 @@ void Game::start() {
                 }
             }
 
-            if (moveCamera && event.type == sf::Event::MouseMoved) {
+            if (moveCamera && event.type == sf::Event::MouseMoved && (moved || Map::dist(oldPos, sf::Vector2i(event.mouseMove.x, event.mouseMove.y)) > 10)) {
                 moved = true;
-                newPos = sf::Vector2f(event.mouseMove.x, event.mouseMove.y);
-                _camera.setCenter(_camera.getCenter() - (newPos - oldPos) * _zoom_level);
+                newPos = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
+                _camera.setCenter(_camera.getCenter() - sf::Vector2f((newPos - oldPos)) * _zoom_level);
                 oldPos = newPos;
                 _window.setView(_camera);
             }
@@ -98,5 +98,4 @@ void Game::scroll(sf::Event event) {
  
     _camera.setCenter(_camera.getCenter() + camera_offset);
     _zoom_level = new_zoom;
-
 }
