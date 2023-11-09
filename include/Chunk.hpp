@@ -26,7 +26,6 @@ public:
     unsigned char _tiles[256];
 private:
     bool reveal_in_other_chunk(int x, int y);
-    bool addMine(unsigned int pos);
     bool check_flag(int x, int y);
     void get_coord_in_other_chunk(int x, int y, sf::Vector2i& chunk, sf::Vector2i& coord);
 

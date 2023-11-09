@@ -1,11 +1,13 @@
 #include "Game.hpp"
 #include <iostream>
 #include <fstream>
+#include <chrono>
+
 
 Game::Game() : _window(sf::VideoMode(1600, 900), "Infinite Minesweeper!"), _isGameOver(false), _zoom_level(1)
 {
     _window.setFramerateLimit(30);
-    _camera = sf::View(sf::Vector2f(CHUNK_PX_SIZE / 2, CHUNK_PX_SIZE / 2), sf::Vector2f(1920, 1080));
+    _camera = sf::View(sf::Vector2f(0,0), sf::Vector2f(1600, 900));
 }
 
 Game::~Game()
@@ -15,23 +17,91 @@ Game::~Game()
 void Game::start() {
 
 
+    bool drawClickSprite = true;
+ 
+     _window.setView(_camera);
+     sf::Texture background;
+     background.loadFromFile(".\\assets\\Welcome Screen.png");
+     sf::Sprite backgroundSprite(background);
+
+     sf::Texture click_to_start;
+     click_to_start.loadFromFile(".\\assets\\click_to_start.png");
+     sf::Sprite click_to_startSprite(click_to_start);
+     _camera.setCenter(sf::Vector2f(background.getSize()) / 2.f);
+
+     auto lastToggleTime = std::chrono::high_resolution_clock::now();
+     const std::chrono::milliseconds toggleInterval(400);
+
+    //Game main loop
+     while (_window.isOpen()) {
+
+         sf::Event event;
+         while (_window.pollEvent(event)) {
+
+             if (event.type == sf::Event::Closed)
+                 _window.close();
+
+             if (event.type == sf::Event::MouseButtonPressed) {
+                 start_game();
+             }
+
+
+
+             if (event.type == sf::Event::MouseButtonReleased) {
+
+             }
+
+         }
+
+
+         _window.clear();
+
+         _camera.setSize(sf::Vector2f(_window.getSize()) * _zoom_level);
+         _window.setView(_camera);
+         _window.draw(backgroundSprite);
+
+         // Calculate the time since the last toggle
+         auto currentTime = std::chrono::high_resolution_clock::now();
+         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - lastToggleTime);
+         if (elapsed >= toggleInterval) {
+             drawClickSprite = !drawClickSprite;
+             lastToggleTime = currentTime;
+         }
+        if (drawClickSprite)
+        _window.draw(click_to_startSprite);
+
+
+        _window.display();
+    }
+    save();
+}
+
+
+void Game::start_game() {
+    
     //Mouse positions
     sf::Vector2i oldPos, newPos;
     //Did the camera moved
     bool moved = false;
+
+    bool pressed = false;
+
     //Can the camera move
     bool moveCamera = false;
-        _window.setView(_camera);
+
+    _camera.setCenter(sf::Vector2f(CHUNK_PX_SIZE / 2, CHUNK_PX_SIZE / 2));
+
+    sf::Event event;
 
     //Game main loop
     while (_window.isOpen()) {
-        sf::Event event;
         while (_window.pollEvent(event)) {
 
             if (event.type == sf::Event::Closed)
                 _window.close();
 
             if (event.type == sf::Event::MouseButtonPressed) {
+                pressed = true;
                 oldPos.x = event.mouseButton.x;
                 oldPos.y = event.mouseButton.y;
                 moved = false;
@@ -48,7 +118,8 @@ void Game::start() {
                 _window.setView(_camera);
             }
 
-            if (event.type == sf::Event::MouseButtonReleased) {
+            if (pressed && event.type == sf::Event::MouseButtonReleased) {
+                pressed = false;
                 moveCamera = false;
                 if (_isGameOver)
                     continue;
@@ -68,7 +139,6 @@ void Game::start() {
         _map.draw(_window, _camera.getCenter(), _isGameOver, _zoom_level);
         _window.display();
     }
-    save();
 }
 
 void Game::save() {

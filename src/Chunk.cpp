@@ -17,26 +17,6 @@ Chunk::~Chunk()
 
 }
 
-bool Chunk::addMine(unsigned int pos) {
-    // if already is a mine return
-    if ((_tiles[pos] & MINE) != 0)
-        return false;
-    //add a mine
-    _tiles[pos] |= MINE;
-
-    // add +1 to the mine counter of the tiles arounds
-    int x = pos % CHUNK_SIZE;
-    int y = (pos - x) / CHUNK_SIZE;
-    for (int i = x - 1; i < x + 2; i += 1) {
-        for (int j = y - 1; j < y + 2; j += 1) {
-            if (i < 0 || i > CHUNK_SIZE -1 || j < 0 || j > CHUNK_SIZE - 1)
-                continue;
-            _tiles[j * CHUNK_SIZE + i] += 1;
-        }
-    }
-    return true;
-}
-
 sf::Vector2i const& Chunk::getPos() {
     return _pos;
 }

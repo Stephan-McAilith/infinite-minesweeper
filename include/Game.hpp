@@ -16,6 +16,8 @@ public:
     void load(std::string save);
 
 private:
+    void start_game();
+    void loop();
     void save();
     void scroll(sf::Event event);
     sf::RenderWindow _window;
