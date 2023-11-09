@@ -5,6 +5,11 @@
 #define MINE 0b00010000
 #define REVEALED 0b00100000
 #define FLAG 0b01000000
+#define TILE_PX_SIZE 32
+#define CHUNK_SIZE 16
+#define CHUNK_NB_TILES (CHUNK_SIZE * CHUNK_SIZE)
+#define CHUNK_PX_SIZE (CHUNK_SIZE * TILE_PX_SIZE)
+
 
 
 class Chunk {

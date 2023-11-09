@@ -11,14 +11,14 @@ class Map {
 public:
     Map();
     ~Map();
-    void draw(sf::RenderWindow& window, sf::Vector2f camera, bool over);
+    void draw(sf::RenderWindow& window, sf::Vector2f camera, bool over, float zoom_level);
     bool click(sf::Vector2f target, sf::Mouse::Button button);
     void save(std::ofstream& file);
     void load(std::ifstream& file);
 
 private:
     void create_new_chunk(sf::Vector2i coord);
-    int dist(sf::Vector2i, sf::Vector2i);
+    float dist(sf::Vector2i, sf::Vector2i);
     bool reveal(sf::Vector2i chunk, sf::Vector2i coord);
     unsigned char get_tile(sf::Vector2i chunk, sf::Vector2i coord);
     int get_chunk_id(sf::Vector2i coord);
