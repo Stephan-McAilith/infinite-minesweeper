@@ -2,5 +2,5 @@
 .vscode
 x64
 *.aps
-*.vcxproj*
 *.mine
+*/x64

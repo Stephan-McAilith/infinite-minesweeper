@@ -11,15 +11,20 @@ Game::Game() : _window(sf::VideoMode(1600, 900), "Infinite Minesweeper!"), _isGa
 {
     _window.setFramerateLimit(30);
     _camera = sf::View(sf::Vector2f(0,0), sf::Vector2f(1600, 900));
+
+    m_endpoint.clear_access_channels(websocketpp::log::alevel::all);
+    m_endpoint.clear_error_channels(websocketpp::log::elevel::all);
+    m_endpoint.init_asio();
+    m_endpoint.start_perpetual();
+    m_thread.reset(new websocketpp::lib::thread(&client::run, &m_endpoint));
 }
 
 Game::~Game()
 {
 }
 
-void Game::start() {
-
-
+void Game::start(std::string uri) {
+    connect(uri);
     bool drawClickSprite = true;
  
      _window.setView(_camera);
@@ -142,6 +147,38 @@ void Game::start_game() {
         _map.draw(_window, _camera.getCenter(), _isGameOver, _zoom_level);
         _window.display();
     }
+}
+
+void Game::connect(std::string uri) {
+    std::cout << "Connecting to " + uri << std::endl;
+    websocketpp::lib::error_code ec;
+
+    client::connection_ptr con = m_endpoint.get_connection(uri, ec);
+
+    if (ec) {
+        std::cout << "> Connect initialization error: " << ec.message() << std::endl;
+        return;
+    }
+
+    Connection::ptr metadata_ptr(new Connection(con->get_handle(), uri));
+
+    con->set_open_handler(websocketpp::lib::bind(
+        &Connection::on_open,
+        metadata_ptr,
+        &m_endpoint,
+        websocketpp::lib::placeholders::_1
+    ));
+    con->set_fail_handler(websocketpp::lib::bind(
+        &Connection::on_fail,
+        metadata_ptr,
+        &m_endpoint,
+        websocketpp::lib::placeholders::_1
+    ));
+
+    con->set_message_handler(websocketpp::lib::bind(&Connection::on_message, metadata_ptr, &m_endpoint, websocketpp::lib::placeholders::_1, websocketpp::lib::placeholders::_2));
+    m_endpoint.connect(con);
+    //std::cout << *metadata_ptr << std::endl;
+
 }
 
 void Game::save() {
